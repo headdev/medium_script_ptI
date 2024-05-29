@@ -13,7 +13,7 @@ async function profitablity_checks(mapped_paths) {
    */
   for (const path of mapped_paths) {
     off_chain_check(path);
-    console.log(path.profit_usd);
+    console.log(path.profit_usd, path);
     if (path.profit_usd > MIN_PROFIT_TO_CONSIDER_FOR_ON_CHAIN_CALL) {
       ordered_profitable_path_with_optimal_input_amount.push(path);
     }

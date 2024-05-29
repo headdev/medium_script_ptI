@@ -22,7 +22,10 @@ async function init() {
      */
     const defi_array_of_objects = await get_all_defi_liquidty_pools(
       //--pick a time frame --//
+      6
     );
+
+    // console.log(defi_array_of_objects);
     const path_and_loan_pools = [];
 
     if (defi_array_of_objects) {
@@ -56,7 +59,7 @@ async function init() {
       await profitablity_checks(path_and_loan_pools);
     }
   } catch (error) {
-    console.error(error);
+    console.error('error', error);
   }
 }
 

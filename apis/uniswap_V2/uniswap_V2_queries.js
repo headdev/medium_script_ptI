@@ -47,7 +47,7 @@ function get_uniswap_usd_volume_by_the_hour_V2({ setHours: time }) {
   const hour = Math.floor(curr.getTime() / 1000);
 
   const queryStr = `{
-    pairHourDatas(first: 1000, orderBy: hourlyVolumeUSD, orderDirection: desc, where: {hourStartUnix_gte:${hour}}){
+    pairHourDatas(first: 1000, orderBy: hourlyVolumeUSD, orderDirection: desc, where: {date_gte: ${hour}, volumeUSD_gt: 100000, reserveUSD_gt: 100000}){
       pair{
       id
       reserve0
