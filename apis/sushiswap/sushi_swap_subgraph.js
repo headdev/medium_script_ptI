@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 const axios = require('axios');
-
+const dotenv = require('dotenv')
+dotenv.config();
 
 
 
@@ -8,7 +9,7 @@ const axios = require('axios');
 
 async function sushiswapSubgraph_Api(query) {
   try {
-    const url = 'https://api.thegraph.com/subgraphs/name/sushiswap/exchange';
+    const url = 'https://gateway-arbitrum.network.thegraph.com/api/${process.env.THEGRAPH_API_KEY}/subgraphs/id/CKaCne3uUUEqT7Ei9jjZbQqTLntEno9LnFa4JnsqqBma';
     const { data } = await axios.post(url, query);
 
     return data.data;

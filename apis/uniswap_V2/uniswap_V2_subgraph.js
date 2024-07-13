@@ -3,7 +3,7 @@ const axios = require('axios');
 async function uniswapSubgraph_V2_Api(query) {
   try {
 
-    const url = 'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2';
+    const url = 'https://api.studio.thegraph.com/query/70625/uniswapv2/v0.0.1';
     const { data } = await axios.post(url, query);
 
     return data.data;
