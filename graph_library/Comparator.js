@@ -1,15 +1,9 @@
-export default class Comparator {
-    /**
-     * Constructor.
-     * @param {function(a: *, b: *)} [compareFunction] - It may be custom compare function that, let's
-     * say may compare custom objects together.
-     */
-    compare: (a: any, b: any) => 0 | 1 | -1;
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class Comparator {
     constructor(compareFunction) {
-      this.compare = compareFunction || Comparator.defaultCompareFunction;
+        this.compare = compareFunction || Comparator.defaultCompareFunction;
     }
-  
     /**
      * Default comparison function. It just assumes that "a" and "b" are strings or numbers.
      * @param {(string|number)} a
@@ -17,13 +11,11 @@ export default class Comparator {
      * @returns {number}
      */
     static defaultCompareFunction(a, b) {
-      if (a === b) {
-        return 0;
-      }
-  
-      return a < b ? -1 : 1;
+        if (a === b) {
+            return 0;
+        }
+        return a < b ? -1 : 1;
     }
-  
     /**
      * Checks if two variables are equal.
      * @param {*} a
@@ -31,9 +23,8 @@ export default class Comparator {
      * @return {boolean}
      */
     equal(a, b) {
-      return this.compare(a, b) === 0;
+        return this.compare(a, b) === 0;
     }
-  
     /**
      * Checks if variable "a" is less than "b".
      * @param {*} a
@@ -41,9 +32,8 @@ export default class Comparator {
      * @return {boolean}
      */
     lessThan(a, b) {
-      return this.compare(a, b) < 0;
+        return this.compare(a, b) < 0;
     }
-  
     /**
      * Checks if variable "a" is greater than "b".
      * @param {*} a
@@ -51,9 +41,8 @@ export default class Comparator {
      * @return {boolean}
      */
     greaterThan(a, b) {
-      return this.compare(a, b) > 0;
+        return this.compare(a, b) > 0;
     }
-  
     /**
      * Checks if variable "a" is less than or equal to "b".
      * @param {*} a
@@ -61,9 +50,8 @@ export default class Comparator {
      * @return {boolean}
      */
     lessThanOrEqual(a, b) {
-      return this.lessThan(a, b) || this.equal(a, b);
+        return this.lessThan(a, b) || this.equal(a, b);
     }
-  
     /**
      * Checks if variable "a" is greater than or equal to "b".
      * @param {*} a
@@ -71,14 +59,14 @@ export default class Comparator {
      * @return {boolean}
      */
     greaterThanOrEqual(a, b) {
-      return this.greaterThan(a, b) || this.equal(a, b);
+        return this.greaterThan(a, b) || this.equal(a, b);
     }
-  
     /**
      * Reverses the comparison order.
      */
     reverse() {
-      const compareOriginal = this.compare;
-      this.compare = (a, b) => compareOriginal(b, a);
+        const compareOriginal = this.compare;
+        this.compare = (a, b) => compareOriginal(b, a);
     }
-  }
+}
+exports.default = Comparator;

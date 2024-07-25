@@ -1,5 +1,22 @@
+
+
 function verfiy_token_path(path) {
+  console.log("Verificando token path:", JSON.stringify(path));
+  
+  if (!Array.isArray(path) || path.length !== 3) {
+    console.warn('Invalid path structure:', JSON.stringify(path));
+    return false;
+  }
+
   const [pool_1, pool_2, pool_3] = path;
+
+  if (!pool_1 || !pool_2 || !pool_3 || 
+      !pool_1.token0 || !pool_1.token1 || 
+      !pool_2.token0 || !pool_2.token1 || 
+      !pool_3.token0 || !pool_3.token1) {
+    console.warn('Invalid pool structure in path:', JSON.stringify(path));
+    return false;
+  }
 
   const pool_1_token_0 = pool_1.token0.id;
   const pool_1_token_1 = pool_1.token1.id;
@@ -23,12 +40,22 @@ function verfiy_token_path(path) {
   const pool_3_token_in = pool_2_token_out;
   const pool_3_token_out = pool_1_token_in;
 
+  // Verificar que los tokens forman un ciclo válido
+  if (pool_1_token_out !== pool_2_token_in || 
+      pool_2_token_out !== pool_3_token_in || 
+      pool_3_token_out !== pool_1_token_in) {
+    console.warn('Invalid token sequence in path:', JSON.stringify(path));
+    return false;
+  }
+
   pool_1.token_in = pool_1_token_in;
   pool_1.token_out = pool_1_token_out;
   pool_2.token_in = pool_2_token_in;
   pool_2.token_out = pool_2_token_out;
   pool_3.token_in = pool_3_token_in;
   pool_3.token_out = pool_3_token_out;
+
+  return true;
 }
 
 function uniswap_V3_swap_math(pool, amount) {

@@ -9,7 +9,7 @@ dotenv.config();
 
 async function sushiswapSubgraph_Api(query) {
   try {
-    const url = 'https://gateway-arbitrum.network.thegraph.com/api/${process.env.THEGRAPH_API_KEY}/subgraphs/id/CKaCne3uUUEqT7Ei9jjZbQqTLntEno9LnFa4JnsqqBma';
+    const url = 'https://gateway-arbitrum.network.thegraph.com/api/6842087090c3e66bac508150e15a17a9/subgraphs/id/CKaCne3uUUEqT7Ei9jjZbQqTLntEno9LnFa4JnsqqBma';
     const { data } = await axios.post(url, query);
 
     return data.data;
