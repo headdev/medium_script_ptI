@@ -224,16 +224,11 @@ function produce_simple_exchange_paths(exchangeObject) {
     if (simple_paths.length >= maxPathsToProcess) break;
     
     console.log("Procesando ciclo:", cycle);
-    if (cycle[0] !== cycle[cycle.length - 1]) {
-      console.warn("Ciclo inválido, saltando...");
-      continue;
-    }
-    
     const formatted_path = formatPath(cycle, graph, poolInfo);
     if (formatted_path.path.length > 0) {
-      const profit = calculateProfit(formatted_path.path, graph);
-      console.log("Profit calculado para el ciclo:", profit);
-      formatted_path.profit = profit;
+      const profitPercentage = calculateProfit(formatted_path.path, graph);
+      console.log("Profit calculado para el ciclo:", profitPercentage.toFixed(2) + "%");
+      formatted_path.profit = profitPercentage;
       simple_paths.push(formatted_path);
     }
   }
@@ -260,16 +255,16 @@ function calculateProfit(path, graph) {
     profit *= adjustedRate;
     console.log(`Paso ${i + 1}: from=${from}, to=${to}, rate=${rate}, fee=${fee}, adjustedRate=${adjustedRate}, profit actual=${profit}`);
   }
-  const finalProfit = profit - 1;
-  console.log(`Profit final calculado: ${finalProfit}`);
-  return finalProfit;
+  const profitPercentage = (profit - 1) * 100;
+  console.log(`Profit final calculado: ${profitPercentage.toFixed(2)}%`);
+  return profitPercentage;
 }
 
 
 function filterProfitablePaths(paths, graph) {
   return paths.filter(path => {
-    const profit = calculateProfit(path.path, graph);
-    return profit > MIN_PROFIT_TO_CONSIDER_FOR_ON_CHAIN_CALL;
+    const profitPercentage = calculateProfit(path.path, graph);
+    return profitPercentage > MIN_PROFIT_TO_CONSIDER_FOR_ON_CHAIN_CALL;
   });
 }
 

@@ -49,10 +49,10 @@ async function init() {
     // Imprimir los top 10 paths más rentables
     console.log("Top 10 paths más rentables:");
     profitable_paths.slice(0, 10).forEach((path, index) => {
-      console.log(`Path rentable ${index + 1}:`);
-      console.log(`  Profit: ${(path.profit * 100).toFixed(2)}%`);
-      console.log(`  Ruta: ${path.path.map(p => `${p.tokenIn.symbol} -> ${p.tokenOut.symbol}`).join(' -> ')}`);
-      console.log('---');
+    console.log(`Path rentable ${index + 1}:`);
+    console.log(`  Profit: ${path.profit.toFixed(2)}%`);
+    console.log(`  Ruta: ${path.path.map(p => `${p.tokenIn.symbol} -> ${p.tokenOut.symbol}`).join(' -> ')}`);
+    console.log('---');
     });
 
     // Aplicar el chequeo inicial de estructura
