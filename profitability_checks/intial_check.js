@@ -2,6 +2,7 @@ const {
   verfiy_token_path,
   uniswap_V2_sushiswap_swap_math,
   uniswap_V3_swap_math,
+  calculate_profit,
 } = require('./utlis');
 
 const { PRICE_PERCENTAGE_DIFFERENCE_THRESHOLD } = require('../constants');
@@ -9,11 +10,23 @@ const { PRICE_PERCENTAGE_DIFFERENCE_THRESHOLD } = require('../constants');
 function find_most_profitable_permutation(path) {
   console.log("Iniciando find_most_profitable_permutation con path:", JSON.stringify(path));
   
-  let all_permutations_for_order = {
-    price_percentage_difference: -Infinity,
-    path: []
-  };
+  if (!verfiy_token_path(path)) {
+    console.warn('Invalid token path');
+    return {
+      price_percentage_difference: 0,
+      path: path
+    };
+  }
 
+  const result = calculate_profit(path);
+
+  console.log(`Profit calculado: ${result.profit_percentage.toFixed(4)}%`);
+  
+  return {
+    price_percentage_difference: result.profit_percentage,
+    path: path,
+  };
+}
   function find_permutations(path_array, temp) {
     if (!path_array.length) {
       const calculated_path_and_difference = calculate_percentage_difference_of_path(temp);
