@@ -3,6 +3,8 @@ const GraphVertex = require('./graph_library/GraphVertex').default;
 const GraphEdge = require('./graph_library/GraphEdge').default;
 const bellmanFord = require('./dist/bellman-ford').default;
 
+const { FEE_TEIR_PERCENTAGE_OBJECT, MIN_PROFIT_TO_CONSIDER_FOR_ON_CHAIN_CALL } = require('./constants');
+
 function get_multiple_objects_for_mapping(
   exchangeObject,
   pairUUID = {},
@@ -253,9 +255,10 @@ function calculateProfit(path, graph) {
       return 0;
     }
     const rate = Math.exp(-edge.weight);
-    const fee = path[i].fee ? 1 - (parseFloat(path[i].fee) / 10000) : 1;  // Si no hay fee, asumimos 1 (sin fee)
-    profit *= rate * fee;
-    console.log(`Paso ${i + 1}: from=${from}, to=${to}, rate=${rate}, fee=${fee}, profit actual=${profit}`);
+    const fee = FEE_TEIR_PERCENTAGE_OBJECT[path[i].fee] || 0;
+    const adjustedRate = rate * (1 - fee);
+    profit *= adjustedRate;
+    console.log(`Paso ${i + 1}: from=${from}, to=${to}, rate=${rate}, fee=${fee}, adjustedRate=${adjustedRate}, profit actual=${profit}`);
   }
   const finalProfit = profit - 1;
   console.log(`Profit final calculado: ${finalProfit}`);
@@ -263,10 +266,10 @@ function calculateProfit(path, graph) {
 }
 
 
-function filterProfitablePaths(paths, graph, minProfit = 0.001) {
+function filterProfitablePaths(paths, graph) {
   return paths.filter(path => {
-    const profit = calculateProfit(path.token_ids, graph);
-    return profit > minProfit;
+    const profit = calculateProfit(path.path, graph);
+    return profit > MIN_PROFIT_TO_CONSIDER_FOR_ON_CHAIN_CALL;
   });
 }
 
