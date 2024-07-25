@@ -84,19 +84,53 @@ function build_graph(poolAddresses, poolInfo) {
 function findArbitrageOpportunities(graph) {
   const vertices = graph.getAllVertices();
   const allCyclePaths = new Set();
+  const maxCycles = 1000; // Límite máximo de ciclos a encontrar
   
   for (const startVertex of vertices) {
+    if (allCyclePaths.size >= maxCycles) break;
+    
     const cycles = findCyclesFromVertex(graph, startVertex, 3, 6);
-    cycles.forEach(cycle => {
+    for (const cycle of cycles) {
+      if (allCyclePaths.size >= maxCycles) break;
+      
       const cycleKey = cycle.join('_');
       if (!allCyclePaths.has(cycleKey)) {
         allCyclePaths.add(cycleKey);
       }
-    });
+    }
   }
   
   console.log(`Encontrados ${allCyclePaths.size} ciclos potenciales únicos en total`);
   return Array.from(allCyclePaths).map(cycleKey => cycleKey.split('_'));
+}
+
+function findCyclesFromVertex(graph, startVertex, minLength, maxLength) {
+  const cycles = [];
+  const path = [startVertex];
+  const maxCyclesPerVertex = 100; // Límite de ciclos por vértice
+  
+  function dfs(currentVertex, depth) {
+    if (cycles.length >= maxCyclesPerVertex) return;
+    
+    if (depth >= minLength - 1 && depth < maxLength) {
+      if (graph.findEdge(currentVertex, startVertex)) {
+        cycles.push([...path.map(v => v.getKey()), startVertex.getKey()]);
+      }
+    }
+    
+    if (depth >= maxLength - 1) return;
+    
+    for (const neighbor of graph.getNeighbors(currentVertex)) {
+      if (!path.includes(neighbor) && neighbor !== startVertex) {
+        path.push(neighbor);
+        dfs(neighbor, depth + 1);
+        path.pop();
+      }
+    }
+  }
+  
+  dfs(startVertex, 0);
+  return cycles;
 }
 
 function findCyclesOfLength(graph, startVertex, length) {
@@ -180,8 +214,11 @@ function produce_simple_exchange_paths(exchangeObject) {
   console.log("Número de ciclos únicos encontrados:", cycles.length);
 
   const simple_paths = [];
+  const maxPathsToProcess = 1000; 
 
   for (const cycle of cycles) {
+    if (simple_paths.length >= maxPathsToProcess) break;
+    
     console.log("Procesando ciclo:", cycle);
     const formatted_path = formatPath(cycle, graph, poolInfo);
     if (formatted_path.path.length > 0) {
