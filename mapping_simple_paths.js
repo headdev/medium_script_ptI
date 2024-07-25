@@ -83,17 +83,20 @@ function build_graph(poolAddresses, poolInfo) {
 
 function findArbitrageOpportunities(graph) {
   const vertices = graph.getAllVertices();
-  let allCyclePaths = [];
+  const allCyclePaths = new Set();
   
   for (const startVertex of vertices) {
-    for (let pathLength = 3; pathLength <= 6; pathLength++) {
-      const cycles = findCyclesOfLength(graph, startVertex, pathLength);
-      allCyclePaths = allCyclePaths.concat(cycles);
-    }
+    const cycles = findCyclesFromVertex(graph, startVertex, 3, 6);
+    cycles.forEach(cycle => {
+      const cycleKey = cycle.join('_');
+      if (!allCyclePaths.has(cycleKey)) {
+        allCyclePaths.add(cycleKey);
+      }
+    });
   }
   
-  console.log(`Encontrados ${allCyclePaths.length} ciclos potenciales en total`);
-  return allCyclePaths;
+  console.log(`Encontrados ${allCyclePaths.size} ciclos potenciales únicos en total`);
+  return Array.from(allCyclePaths).map(cycleKey => cycleKey.split('_'));
 }
 
 function findCyclesOfLength(graph, startVertex, length) {
@@ -174,22 +177,20 @@ function produce_simple_exchange_paths(exchangeObject) {
   console.log("Número de vértices en el grafo:", graph.getAllVertices().length);
 
   const cycles = findArbitrageOpportunities(graph);
-  console.log("Número de ciclos encontrados:", cycles.length);
+  console.log("Número de ciclos únicos encontrados:", cycles.length);
 
   const simple_paths = [];
 
   for (const cycle of cycles) {
-    if (cycle.length >= 3 && cycle.length <= 6) {
-      console.log("Procesando ciclo:", cycle);
-      const formatted_path = formatPath(cycle, graph, poolInfo);
-      if (formatted_path.path.length > 0) {
-        simple_paths.push(formatted_path);
-      }
+    console.log("Procesando ciclo:", cycle);
+    const formatted_path = formatPath(cycle, graph, poolInfo);
+    if (formatted_path.path.length > 0) {
+      simple_paths.push(formatted_path);
     }
   }
 
-  console.log("Número de paths generados:", simple_paths.length);
-  return simple_paths;
+  console.log("Número de paths triangulares válidos generados:", simple_paths.length);
+  return { graph, simple_paths };
 }
 
 function calculateProfit(path, graph) {

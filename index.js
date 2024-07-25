@@ -26,7 +26,7 @@ async function init() {
       return;
     }
 
-    const simple_paths = produce_simple_exchange_paths(defi_array_of_objects);
+    const { graph, simple_paths } = produce_simple_exchange_paths(defi_array_of_objects);
     console.log("Paths generados:", simple_paths.length);
 
     if (simple_paths.length === 0) {
@@ -87,8 +87,3 @@ async function init() {
     console.log("Proceso de búsqueda de oportunidades de arbitraje finalizado.");
   }
 }
-
-// Ejecutar la función init
-init().catch(error => {
-  console.error('Error no manejado en init:', error);
-});
