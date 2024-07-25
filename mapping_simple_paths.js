@@ -93,10 +93,12 @@ function findArbitrageOpportunities(graph) {
     for (const cycle of cycles) {
       if (allCyclePaths.size >= maxCycles) break;
       
-      const sortedCycle = [...cycle].sort().join('_');
-      if (!allCyclePaths.has(sortedCycle)) {
-        allCyclePaths.add(sortedCycle);
-        console.log("Nuevo ciclo encontrado:", cycle);
+      if (cycle[0] === cycle[cycle.length - 1]) {  // Asegurarse de que el ciclo es válido
+        const sortedCycle = [...cycle].sort().join('_');
+        if (!allCyclePaths.has(sortedCycle)) {
+          allCyclePaths.add(sortedCycle);
+          console.log("Nuevo ciclo encontrado:", cycle);
+        }
       }
     }
   }
@@ -160,21 +162,27 @@ function findCyclesOfLength(graph, startVertex, length) {
 }
 
 function formatPath(cycle, graph, poolInfo) {
+  console.log("Formateando path:", cycle);
+  if (cycle[0] !== cycle[cycle.length - 1]) {
+    console.warn('Ciclo inválido: el token inicial y final no coinciden');
+    return { path: [], token_ids: [], pool_addresses: [] };
+  }
+
   const path_info = [];
-  for (let i = 0; i < cycle.length; i++) {
+  for (let i = 0; i < cycle.length - 1; i++) {
     const from = cycle[i];
-    const to = cycle[(i + 1) % cycle.length];
+    const to = cycle[i + 1];
     const edge = graph.findEdge(graph.getVertexByKey(from), graph.getVertexByKey(to));
     
     if (!edge || !edge.metadata || !edge.metadata.poolId) {
       console.warn('Invalid edge:', from, to);
-      continue;
+      continue;  // Cambiamos return por continue para seguir procesando
     }
 
     const pool = poolInfo[edge.metadata.poolId];
     if (!pool || !pool.token0 || !pool.token1) {
       console.warn('Invalid pool:', edge.metadata.poolId);
-      continue;
+      continue;  // Cambiamos return por continue para seguir procesando
     }
 
     path_info.push({
@@ -183,7 +191,8 @@ function formatPath(cycle, graph, poolInfo) {
       tokenOut: pool.token1,
       price: edge.rawWeight,
       exchange: edge.metadata.exchange,
-      id: edge.metadata.poolId
+      id: edge.metadata.poolId,
+      fee: edge.metadata.fee  // Asegúrate de que el fee se está guardando aquí
     });
   }
   
@@ -191,10 +200,11 @@ function formatPath(cycle, graph, poolInfo) {
   
   return {
     path: path_info,
-    token_ids: cycle,
+    token_ids: cycle.slice(0, -1),
     pool_addresses: path_info.map(p => p.id)
   };
 }
+
 
 function produce_simple_exchange_paths(exchangeObject) {
   console.log("Número de pools recibidos:", exchangeObject.length);
@@ -247,7 +257,7 @@ function calculateProfit(path, graph) {
       return 0;
     }
     const rate = Math.exp(-edge.weight);
-    const fee = 1 - (parseFloat(path[i].tokenOut.fee) / 10000);
+    const fee = path[i].fee ? 1 - (parseFloat(path[i].fee) / 10000) : 1;  // Si no hay fee, asumimos 1 (sin fee)
     profit *= rate * fee;
     console.log(`Paso ${i + 1}: from=${from}, to=${to}, rate=${rate}, fee=${fee}, profit actual=${profit}`);
   }
@@ -255,6 +265,7 @@ function calculateProfit(path, graph) {
   console.log(`Profit final calculado: ${finalProfit}`);
   return finalProfit;
 }
+
 
 function filterProfitablePaths(paths, graph, minProfit = 0.001) {
   return paths.filter(path => {
