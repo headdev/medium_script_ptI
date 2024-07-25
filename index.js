@@ -34,8 +34,29 @@ async function init() {
       return;
     }
 
+    // Filtrar paths rentables
+    const profitable_paths = simple_paths.filter(path => path.profit > 0);
+    console.log("Paths rentables encontrados:", profitable_paths.length);
+
+    if (profitable_paths.length === 0) {
+      console.log("No se encontraron paths rentables.");
+      return;
+    }
+
+    // Ordenar por rentabilidad
+    profitable_paths.sort((a, b) => b.profit - a.profit);
+
+    // Imprimir los top 10 paths más rentables
+    console.log("Top 10 paths más rentables:");
+    profitable_paths.slice(0, 10).forEach((path, index) => {
+      console.log(`Path rentable ${index + 1}:`);
+      console.log(`  Profit: ${(path.profit * 100).toFixed(2)}%`);
+      console.log(`  Ruta: ${path.path.map(p => `${p.tokenIn.symbol} -> ${p.tokenOut.symbol}`).join(' -> ')}`);
+      console.log('---');
+    });
+
     // Aplicar el chequeo inicial de estructura
-    const profitable_opportunities_initial_check = check_all_structured_paths(simple_paths);
+    const profitable_opportunities_initial_check = check_all_structured_paths(profitable_paths);
     console.log("Oportunidades después del chequeo inicial:", profitable_opportunities_initial_check.length);
 
     if (profitable_opportunities_initial_check.length === 0) {
@@ -62,17 +83,17 @@ async function init() {
     }
 
     // Realizar verificaciones de rentabilidad
-    const profitable_paths = await profitablity_checks(path_and_loan_pools);
+    const final_profitable_paths = await profitablity_checks(path_and_loan_pools);
 
-    console.log(`Número de oportunidades de arbitraje rentables: ${profitable_paths.length}`);
+    console.log(`Número de oportunidades de arbitraje rentables finales: ${final_profitable_paths.length}`);
 
-    if (profitable_paths.length === 0) {
+    if (final_profitable_paths.length === 0) {
       console.log("No se encontraron oportunidades de arbitraje rentables después de las verificaciones de rentabilidad.");
       return;
     }
 
-    // Imprimir detalles de las oportunidades rentables
-    profitable_paths.forEach((opportunity, index) => {
+    // Imprimir detalles de las oportunidades rentables finales
+    final_profitable_paths.forEach((opportunity, index) => {
       console.log(`Oportunidad ${index + 1}:`);
       console.log(`  Beneficio (USD): ${opportunity.profit_usd?.toFixed(2)}`);
       console.log(`  Cantidad óptima: ${opportunity.optimal_amount}`);
@@ -87,3 +108,8 @@ async function init() {
     console.log("Proceso de búsqueda de oportunidades de arbitraje finalizado.");
   }
 }
+
+// Ejecutar la función init
+init().catch(error => {
+  console.error('Error no manejado en init:', error);
+});

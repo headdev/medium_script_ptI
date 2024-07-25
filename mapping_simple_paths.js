@@ -84,7 +84,7 @@ function build_graph(poolAddresses, poolInfo) {
 function findArbitrageOpportunities(graph) {
   const vertices = graph.getAllVertices();
   const allCyclePaths = new Set();
-  const maxCycles = 1000; // Límite máximo de ciclos a encontrar
+  const maxCycles = 1000;
   
   for (const startVertex of vertices) {
     if (allCyclePaths.size >= maxCycles) break;
@@ -93,9 +93,10 @@ function findArbitrageOpportunities(graph) {
     for (const cycle of cycles) {
       if (allCyclePaths.size >= maxCycles) break;
       
-      const cycleKey = cycle.join('_');
-      if (!allCyclePaths.has(cycleKey)) {
-        allCyclePaths.add(cycleKey);
+      const sortedCycle = [...cycle].sort().join('_');
+      if (!allCyclePaths.has(sortedCycle)) {
+        allCyclePaths.add(sortedCycle);
+        console.log("Nuevo ciclo encontrado:", cycle);
       }
     }
   }
@@ -214,7 +215,7 @@ function produce_simple_exchange_paths(exchangeObject) {
   console.log("Número de ciclos únicos encontrados:", cycles.length);
 
   const simple_paths = [];
-  const maxPathsToProcess = 1000; 
+  const maxPathsToProcess = 1000;
 
   for (const cycle of cycles) {
     if (simple_paths.length >= maxPathsToProcess) break;
@@ -222,7 +223,10 @@ function produce_simple_exchange_paths(exchangeObject) {
     console.log("Procesando ciclo:", cycle);
     const formatted_path = formatPath(cycle, graph, poolInfo);
     if (formatted_path.path.length > 0) {
+      const profit = calculateProfit(formatted_path.path, graph);
+      formatted_path.profit = profit;
       simple_paths.push(formatted_path);
+      console.log("Profit calculado:", profit);
     }
   }
 
@@ -233,15 +237,15 @@ function produce_simple_exchange_paths(exchangeObject) {
 function calculateProfit(path, graph) {
   let profit = 1;
   for (let i = 0; i < path.length; i++) {
-    const from = path[i];
-    const to = path[(i + 1) % path.length];
+    const from = path[i].tokenIn.id;
+    const to = path[i].tokenOut.id;
     const edge = graph.findEdge(graph.getVertexByKey(from), graph.getVertexByKey(to));
     if (!edge) {
       console.warn(`No se encontró el borde entre ${from} y ${to}`);
       return 0;
     }
     const rate = Math.exp(-edge.weight);
-    const fee = edge.metadata.fee ? 1 - (edge.metadata.fee / 10000) : 1;
+    const fee = 1 - (parseFloat(path[i].tokenOut.fee) / 10000);
     profit *= rate * fee;
   }
   return profit - 1;
