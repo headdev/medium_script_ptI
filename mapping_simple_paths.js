@@ -224,9 +224,9 @@ function produce_simple_exchange_paths(exchangeObject) {
     const formatted_path = formatPath(cycle, graph, poolInfo);
     if (formatted_path.path.length > 0) {
       const profit = calculateProfit(formatted_path.path, graph);
+      console.log("Profit calculado para el ciclo:", profit);
       formatted_path.profit = profit;
       simple_paths.push(formatted_path);
-      console.log("Profit calculado:", profit);
     }
   }
 
@@ -234,7 +234,9 @@ function produce_simple_exchange_paths(exchangeObject) {
   return { graph, simple_paths };
 }
 
+
 function calculateProfit(path, graph) {
+  console.log("Calculando profit para path:", path.map(p => `${p.tokenIn.symbol} -> ${p.tokenOut.symbol}`).join(' -> '));
   let profit = 1;
   for (let i = 0; i < path.length; i++) {
     const from = path[i].tokenIn.id;
@@ -247,8 +249,11 @@ function calculateProfit(path, graph) {
     const rate = Math.exp(-edge.weight);
     const fee = 1 - (parseFloat(path[i].tokenOut.fee) / 10000);
     profit *= rate * fee;
+    console.log(`Paso ${i + 1}: from=${from}, to=${to}, rate=${rate}, fee=${fee}, profit actual=${profit}`);
   }
-  return profit - 1;
+  const finalProfit = profit - 1;
+  console.log(`Profit final calculado: ${finalProfit}`);
+  return finalProfit;
 }
 
 function filterProfitablePaths(paths, graph, minProfit = 0.001) {
