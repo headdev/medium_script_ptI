@@ -37,45 +37,42 @@ function find_most_profitable_permutation(path) {
   return all_permutations_for_order;
 }
 
+
+
 function calculate_percentage_difference_of_path(path) {
-  console.log("Calculando diferencia de porcentaje para path:", path);
+  console.log("Calculando diferencia de porcentaje para path:", JSON.stringify(path));
   
   if (!verfiy_token_path(path)) {
-    console.warn('Invalid token path:', path);
+    console.warn('Invalid token path:', JSON.stringify(path));
     return {
       price_percentage_difference: 0,
       path: path
     };
   }
 
-  let arbitrary_amount = 1;
-
-  for (const liqudity_pool of path) {
-    if (liqudity_pool.exchange === 'uniswapV3') {
-      arbitrary_amount = uniswap_V3_swap_math(liqudity_pool, arbitrary_amount);
+  let input_amount = 1; // Comenzamos con 1 unidad del token inicial
+  const initial_token = path[0].tokenIn.symbol;
+  
+  for (const step of path) {
+    if (step.exchange === 'uniswapV3') {
+      input_amount = uniswap_V3_swap_math(step, input_amount);
     } else {
-      arbitrary_amount = uniswap_V2_sushiswap_swap_math(
-        liqudity_pool,
-        arbitrary_amount
-      );
+      input_amount = uniswap_V2_sushiswap_swap_math(step, input_amount);
     }
-    console.log("Después del swap:", liqudity_pool.exchange, "cantidad:", arbitrary_amount);
+    console.log(`Después del swap ${step.from_To}: cantidad = ${input_amount}`);
   }
-  const starting_price = 1;
-  const current_price = arbitrary_amount;
 
-  const absoluteDifference = current_price - starting_price;
+  // Calculamos el profit porcentual
+  const profit_percentage = ((input_amount - 1) / 1) * 100;
 
-  const average = (current_price + starting_price) / 2;
-
-  const price_percentage_difference = (absoluteDifference / average) * 100;
-  console.log("Diferencia de porcentaje calculada:", price_percentage_difference);
+  console.log(`Profit calculado: ${profit_percentage.toFixed(4)}%`);
   
   return {
-    price_percentage_difference: price_percentage_difference,
+    price_percentage_difference: profit_percentage,
     path: path,
   };
 }
+
 
 function check_all_structured_paths(paths) {
   console.log("Número de paths recibidos en check_all_structured_paths:", paths.length);
@@ -83,7 +80,7 @@ function check_all_structured_paths(paths) {
   const inital_check_profitable_paths = [];
 
   for (const path of paths) {
-    console.log("Procesando path:", path);
+    console.log("Procesando path:", JSON.stringify(path));
     const most_profitable_permutation = find_most_profitable_permutation(path.path);
 
     if (most_profitable_permutation.price_percentage_difference > PRICE_PERCENTAGE_DIFFERENCE_THRESHOLD) {
