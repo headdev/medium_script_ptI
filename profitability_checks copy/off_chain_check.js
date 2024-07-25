@@ -72,10 +72,7 @@ function calculate_permutation_and_find_optimal_input_token_amount(
   loan_pools
 ) {
   try {
-    if (!verfiy_token_path(permutation_path)) {
-      console.warn('Invalid token path:', permutation_path);
-      return null;
-    }
+    verfiy_token_path(permutation_path);
 
     const loan_pool = loan_pools[permutation_path[0].token_in];
 
@@ -122,7 +119,7 @@ function calculate_permutation_and_find_optimal_input_token_amount(
         const profit =
           (input_amount - starting_amount) * borrow_token_usd_price;
         if (!calcuations.enough_liquidity) {
-          return null;
+          return;
         }
         if (calcuations.profit === 0) {
           calcuations.profit = profit;
@@ -142,13 +139,10 @@ function calculate_permutation_and_find_optimal_input_token_amount(
         }
       }
     }
-    return calcuations;
   } catch (error) {
-    console.error('Error in calculate_permutation_and_find_optimal_input_token_amount:', error);
-    return null;
+    console.error(error);
   }
 }
-
 function find_most_optimal_permutation(
   all_calculated_permutations,
   path_object
